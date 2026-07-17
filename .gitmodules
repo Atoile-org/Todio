@@ -1,0 +1,3 @@
+[submodule "android/JUCE"]
+	path = android/JUCE
+	url = https://github.com/juce-framework/JUCE.git

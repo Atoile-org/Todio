@@ -84,7 +84,33 @@ android {
         targetSdkVersion rootProject.ext.targetSdkVersion
         versionCode 1
         versionName "1.0"
+
+        // --- JUCE native build (juce_core/events/data_structures/audio_basics/
+        // audio_devices/audio_formats/dsp only) ---
+        externalNativeBuild {
+            cmake {
+                cppFlags "-std=c++17", "-fexceptions", "-frtti"
+                arguments "-DANDROID_STL=c++_shared"
+            }
+        }
+        ndk {
+            abiFilters(*reactNativeArchitectures.split(",").collect { it.trim() })
+        }
     }
+
+    externalNativeBuild {
+        cmake {
+            path "src/main/cpp/CMakeLists.txt"
+            version "3.22.1"
+        }
+    }
+
+    packagingOptions {
+        // React Native/Hermes also ship libc++_shared.so - avoid a duplicate
+        // stripped-lib build failure when both link against the same STL.
+        pickFirst '**/libc++_shared.so'
+    }
+
     signingConfigs {
         debug {
             storeFile file('debug.keystore')

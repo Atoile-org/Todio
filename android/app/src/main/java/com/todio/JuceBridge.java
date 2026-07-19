@@ -13,6 +13,7 @@ public class JuceBridge {
     public static native void audioInit();
     public static native boolean audioLoadFile(String path);
     public static native void audioPlay();
+    public static native void setPosition(double position);
     public static native void audioPause();
     public static native void audioStop();
     public static native void setResamplingRatio(float ratio);

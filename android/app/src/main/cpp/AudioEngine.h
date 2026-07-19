@@ -58,6 +58,7 @@ public:
     void play()  { transportSource.start(); }
     void pause() { transportSource.stop(); }
     void stop()  { transportSource.stop(); transportSource.setPosition(0.0); }
+    void setPosition( double position )  { transportSource.setPosition( position ); }
 
     double getCurrentPosition() { return transportSource.getCurrentPosition(); }
     double getLengthInSeconds() { return transportSource.getLengthInSeconds(); }

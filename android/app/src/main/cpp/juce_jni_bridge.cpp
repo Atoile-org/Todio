@@ -37,6 +37,10 @@ Java_com_todio_JuceBridge_getLengthInSeconds(JNIEnv*, jclass) {
     if (engine) return engine->getLengthInSeconds();
     return 0.0;
 }
+extern "C" JNIEXPORT void JNICALL
+Java_com_todio_JuceBridge_setPosition(JNIEnv*, jclass, jdouble position) {
+    if (engine) engine->setPosition(position);
+}
 extern "C" JNIEXPORT jboolean JNICALL
 Java_com_todio_JuceBridge_isPlaying(JNIEnv*, jclass) {
     if (engine) return engine->isPlaying();

@@ -100,7 +100,7 @@ android {
 
     externalNativeBuild {
         cmake {
-            path "src/main/cpp/CMakeLists.txt"
+            path "src/main/jni/CMakeLists.txt"
             version "3.22.1"
         }
     }
@@ -129,6 +129,26 @@ android {
             signingConfig signingConfigs.debug
             minifyEnabled enableProguardInReleaseBuilds
             proguardFiles getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro"
+        }
+    }
+
+    sourceSets {
+        main {
+            java.srcDirs += [
+                    // juce_core (already present)
+                    'src/main/cpp/JUCE/modules/juce_core/native/java/app',
+                    'src/main/cpp/JUCE/modules/juce_core/native/javacore/app',
+                    'src/main/cpp/JUCE/modules/juce_core/native/javacore/init',
+
+                    // juce_audio_devices — audio routing JNI
+                    'src/main/cpp/JUCE/modules/juce_audio_devices/native/java/app',
+
+//                     // juce_opengl — GL context JNI
+//                     'src/main/cpp/JUCE/modules/juce_opengl/native/java/app',
+//
+//                     // juce_video — video playback JNI
+//                     'src/main/cpp/JUCE/modules/juce_video/native/java/app',
+            ]
         }
     }
 }

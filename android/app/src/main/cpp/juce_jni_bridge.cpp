@@ -1,38 +1,44 @@
-// android/app/src/main/cpp/juce_jni_bridge.cpp
-//
-// Minimal placeholder so todio_juce.so actually links something against the
-// 7 JUCE modules. Replace/extend Java_com_todio_JuceBridge_* with your real
-// entry points (starting the audio device manager, decoding a file, running
-// a juce::dsp chain, etc). Rename the package/class to match wherever your
-// Kotlin bridge class actually lives.
-
+#include "AudioEngine.h"
 #include <jni.h>
 
-#include <juce_core/juce_core.h>
-#include <juce_events/juce_events.h>
-#include <juce_data_structures/juce_data_structures.h>
-#include <juce_audio_basics/juce_audio_basics.h>
-#include <juce_audio_devices/juce_audio_devices.h>
-#include <juce_audio_formats/juce_audio_formats.h>
-#include <juce_dsp/juce_dsp.h>
-
-// NOTE: we deliberately do NOT define JNI_OnLoad here. JUCE's own juce_core
-// module (juce_Threads_android.cpp) already defines JNI_OnLoad to capture the
-// JavaVM* for its own internal use - a second definition in this file causes
-// a duplicate-symbol linker error. Do explicit init from Kotlin instead
-// (call nativeInit() once, e.g. from your Application's onCreate).
+namespace { std::unique_ptr<AudioEngine> engine; }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_todio_JuceBridge_nativeInit(JNIEnv* /*env*/, jobject /*thiz*/)
-{
-    // Starts JUCE's message loop for this process. Needed before touching
-    // juce::AudioDeviceManager, timers, async callbacks, etc. Safe to call
-    // more than once; JUCE just returns the existing instance.
-    juce::MessageManager::getInstance();
+Java_com_todio_JuceBridge_audioInit(JNIEnv*, jclass) {
+    engine = std::make_unique<AudioEngine>();
 }
 
-extern "C" JNIEXPORT jstring JNICALL
-Java_com_todio_JuceBridge_getJuceVersion(JNIEnv* env, jobject /*thiz*/)
-{
-    return env->NewStringUTF(juce::SystemStats::getJUCEVersion().toRawUTF8());
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_todio_JuceBridge_audioLoadFile(JNIEnv* env, jclass, jstring path) {
+    const char* cPath = env->GetStringUTFChars(path, nullptr);
+    bool ok = engine && engine->loadFile(juce::String(cPath));
+    env->ReleaseStringUTFChars(path, cPath);
+    return ok;
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_todio_JuceBridge_audioPlay(JNIEnv*, jclass)  { if (engine) engine->play();  }
+extern "C" JNIEXPORT void JNICALL
+Java_com_todio_JuceBridge_audioPause(JNIEnv*, jclass) { if (engine) engine->pause(); }
+extern "C" JNIEXPORT void JNICALL
+Java_com_todio_JuceBridge_audioStop(JNIEnv*, jclass)  { if (engine) engine->stop();  }
+extern "C" JNIEXPORT void JNICALL
+Java_com_todio_JuceBridge_setResamplingRatio(JNIEnv*, jclass, jfloat ratio) {
+    if (engine) engine->setResamplingRatio(ratio);
+}
+
+extern "C" JNIEXPORT double JNICALL
+Java_com_todio_JuceBridge_getCurrentPosition(JNIEnv*, jclass) {
+    if (engine) return engine->getCurrentPosition();
+    return 0.0;
+}
+extern "C" JNIEXPORT double JNICALL
+Java_com_todio_JuceBridge_getLengthInSeconds(JNIEnv*, jclass) {
+    if (engine) return engine->getLengthInSeconds();
+    return 0.0;
+}
+extern "C" JNIEXPORT jboolean JNICALL
+Java_com_todio_JuceBridge_isPlaying(JNIEnv*, jclass) {
+    if (engine) return engine->isPlaying();
+    return false;
 }

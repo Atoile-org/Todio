@@ -14,6 +14,11 @@ public class ReactJuceBridge extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void audioLoadFile(String path) {
+        JuceBridge.audioLoadFile(path);
+    }
+
+    @ReactMethod
     public void audioPlay() {
         JuceBridge.audioPlay();
     }

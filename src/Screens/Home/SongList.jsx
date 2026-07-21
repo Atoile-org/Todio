@@ -12,7 +12,7 @@ import { Import, Music } from 'lucide-react-native/icons';
 import { TodioCtx } from '../../App';
 import { useContext, useEffect, useState } from 'react';
 import {
-  getAudioArtwork, getAudioMeta,
+  getAudioMeta,
   listAudioFiles,
   pickAudioFiles,
 } from '../../utils/filesUtils';
@@ -35,6 +35,8 @@ export default function SongList({ route }) {
             ...song,
             artwork: meta.artwork,
             artist: meta.artist,
+            name: meta.name,
+            year: meta.year,
         }}),
       );
       setSongList(withArt);
@@ -105,7 +107,7 @@ export default function SongList({ route }) {
               >
                 {item.name ?? item.title ?? 'Unknown title'}
               </Text>
-              {item.artist || item.mtime ? (
+              {(item.artist || item.mtime || item.year) ? (
                 <Text
                   style={[
                     styles.songSubtitle,
@@ -115,7 +117,7 @@ export default function SongList({ route }) {
                 >
                   {(item.artist ? item.artist : 'Unknow Artist') +
                     ' | ' +
-                    item.mtime}
+                    (item.year ? item.year : item.mtime)}
                 </Text>
               ) : null}
             </View>

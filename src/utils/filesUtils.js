@@ -32,7 +32,11 @@ export async function pickAudioFiles() {
     for (const file of results) {
       console.log(file.uri, file.name, file.size);
 
-      const destPath = `${RNFS.DocumentDirectoryPath}/music/${file.name}`;
+      const meta = await getAudioMeta(file.path);
+
+      const destPath = `${RNFS.DocumentDirectoryPath}/music/${
+        meta.album ? meta.album + '/' : ''
+      }${file.name}`;
       await RNFS.copyFile(file.uri, destPath);
     }
   } catch (err) {
@@ -79,11 +83,14 @@ export async function listAudioFiles() {
 
 export async function getAudioMeta(path) {
   try {
-    const data = await getAudioMetadata(path, ['artwork', 'artist']);
+    const data = await getAudioMetadata(path, ['artwork', 'artist', 'name', 'year', 'album']);
     return (
       {
         artwork: data.metadata.artwork,
-        artist: data.metadata.artist
+        artist: data.metadata.artist,
+        name: data.metadata.name,
+        year: data.metadata.year,
+        album: data.metadata.album,
       } || null
     ); // already base64
   } catch (e) {

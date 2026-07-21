@@ -41,7 +41,7 @@ export default function PlayerScreen() {
   useEffect(() => {
     JuceBridge.getLengthInSeconds().then(setLength);
     JuceBridge.isPlaying().then(setIsPlaying);
-  }, [JuceBridge]);
+  }, [JuceBridge, position]);
 
   return (
     <View style={styles.container}>

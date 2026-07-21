@@ -154,6 +154,8 @@ android {
 }
 
 dependencies {
+    implementation 'com.github.teamnewpipe:NewPipeExtractor:0.26.3'
+
     // The version of react-native is set by the React Native Gradle Plugin
     implementation("com.facebook.react:react-android")
 

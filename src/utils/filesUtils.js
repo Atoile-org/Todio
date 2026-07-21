@@ -77,10 +77,15 @@ export async function listAudioFiles() {
   }
 }
 
-export async function getAudioArtwork(path) {
+export async function getAudioMeta(path) {
   try {
-    const data = await getAudioMetadata(path, ['artwork']);
-    return data.metadata.artwork || null; // already base64
+    const data = await getAudioMetadata(path, ['artwork', 'artist']);
+    return (
+      {
+        artwork: data.metadata.artwork,
+        artist: data.metadata.artist
+      } || null
+    ); // already base64
   } catch (e) {
     console.log(e);
     return null;

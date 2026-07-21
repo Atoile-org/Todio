@@ -12,7 +12,7 @@ import { Import, Music } from 'lucide-react-native/icons';
 import { TodioCtx } from '../../App';
 import { useContext, useEffect, useState } from 'react';
 import {
-  getAudioArtwork,
+  getAudioArtwork, getAudioMeta,
   listAudioFiles,
   pickAudioFiles,
 } from '../../utils/filesUtils';
@@ -27,11 +27,15 @@ export default function SongList({ route }) {
 
   useEffect(() => {
     listAudioFiles().then(async songs => {
+
       const withArt = await Promise.all(
-        songs.map(async song => ({
-          ...song,
-          artwork: await getAudioArtwork(song.path),
-        })),
+        songs.map(async song => {
+          const meta = await getAudioMeta(song.path);
+          return {
+            ...song,
+            artwork: meta.artwork,
+            artist: meta.artist,
+        }}),
       );
       setSongList(withArt);
     });

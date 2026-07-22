@@ -13,7 +13,8 @@ import Animated, {
   useAnimatedStyle,
   withTiming,
   interpolate,
-  Extrapolation, convertToRGBA,
+  Extrapolation,
+  convertToRGBA,
 } from 'react-native-reanimated';
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { Gesture, GestureDetector } from 'react-native-gesture-handler';
@@ -120,7 +121,7 @@ export default function Player() {
     loadData();
     playing?.artwork
       ? extractColors(playing.artwork).then(setPalette)
-      : setPalette(undefined)
+      : setPalette(undefined);
   }, [playing, loadData]);
 
   const toggleFull = useCallback(() => {
@@ -179,12 +180,13 @@ export default function Player() {
     })
     .onEnd(e => {
       'worklet';
-      const shouldOpen = progress.value > (full ? 0.90 : 0.10) || e.velocityY < -500;
+      const shouldOpen =
+        progress.value > (full ? 0.9 : 0.1) || e.velocityY < -500;
       progress.value = withTiming(shouldOpen ? 1 : 0, { duration: DURATION });
       scheduleOnRN(setFull, shouldOpen);
     });
 
-  const expandGesture = Gesture.Exclusive(expandTap, pan);
+  const expandGesture = Gesture.Race(expandTap, pan);
 
   const containerStyle = useAnimatedStyle(() => ({
     height: interpolate(progress.value, [0, 1], [MINI_H, fullH]),
@@ -286,7 +288,7 @@ export default function Player() {
   const artworkSource =
     playing?.artwork || playing?.cover || playing?.image
       ? { uri: playing.artwork || playing.cover || playing.image }
-      : require("./fallback.png");
+      : require('./fallback.png');
 
   return (
     <Animated.View
@@ -309,15 +311,15 @@ export default function Player() {
         style={[styles.overlay, { backgroundColor: 'rgba(0, 0, 0, 0.4)' }]}
       />
 
-      <GestureDetector gesture={expandGesture}>
-        <Animated.View style={expandHitStyle} />
-      </GestureDetector>
-
       <Animated.Image
         source={artworkSource}
         style={[styles.art, artStyle, { backgroundColor: theme.border }]}
         resizeMode="cover"
       />
+
+      <GestureDetector gesture={expandGesture}>
+        <Animated.View style={expandHitStyle} />
+      </GestureDetector>
 
       <Animated.View style={textContainerStyle} pointerEvents="none">
         <Animated.Text
@@ -518,7 +520,7 @@ const styles = StyleSheet.create({
   bg: {
     ...StyleSheet.absoluteFillObject,
     height: '100%',
-    width: "100%",
+    width: '100%',
   },
   overlay: {
     ...StyleSheet.absoluteFillObject,

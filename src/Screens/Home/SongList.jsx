@@ -19,7 +19,7 @@ import {
 import {useNavigation} from "@react-navigation/native";
 
 export default function SongList({ route }) {
-  const { theme } = useContext(TodioCtx);
+  const { theme, setPlaying } = useContext(TodioCtx);
   const { JuceBridge } = NativeModules;
   const [songList, setSongList] = useState([]);
 
@@ -84,7 +84,8 @@ export default function SongList({ route }) {
             activeOpacity={0.6}
             onPress={() => {
               JuceBridge.audioLoadFile(item.path);
-              navigation.push("Player")
+              // navigation.push("Player");
+              setPlaying(item);
             }}
           >
             {item.artwork ? (

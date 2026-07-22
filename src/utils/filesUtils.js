@@ -82,19 +82,31 @@ export async function listAudioFiles() {
 }
 
 export async function getAudioMeta(path) {
+  const empty = {
+    artwork: null,
+    artist: null,
+    name: null,
+    year: null,
+    album: null,
+  };
+
   try {
-    const data = await getAudioMetadata(path, ['artwork', 'artist', 'name', 'year', 'album']);
-    return (
-      {
-        artwork: data.metadata.artwork,
-        artist: data.metadata.artist,
-        name: data.metadata.name,
-        year: data.metadata.year,
-        album: data.metadata.album,
-      } || null
-    ); // already base64
+    const data = await getAudioMetadata(path, [
+      'artwork',
+      'artist',
+      'name',
+      'year',
+      'album',
+    ]);
+    return {
+      artwork: data.metadata.artwork ?? null,
+      artist: data.metadata.artist ?? null,
+      name: data.metadata.name ?? null,
+      year: data.metadata.year ?? null,
+      album: data.metadata.album ?? null,
+    };
   } catch (e) {
-    console.log(e);
-    return null;
+    console.log(`Failed to read metadata for ${path}:`, e);
+    return empty;
   }
 }

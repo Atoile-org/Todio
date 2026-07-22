@@ -12,10 +12,14 @@ export const TodioCtx = createContext()
 
 export default function App() {
   const [theme, setTheme] = useState(colors.dark);
+  const [playing, setPlaying] = useState();
 
   return (
     <SafeAreaProvider>
-      <TodioCtx.Provider value={{ theme, setTheme }}>
+      <TodioCtx.Provider value={{
+        theme, setTheme,
+        playing, setPlaying
+      }}>
         <NavigationContainer>
           <Stack.Navigator
             initialRouteName="Home"

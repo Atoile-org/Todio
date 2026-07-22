@@ -7,6 +7,8 @@ import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 import SongList from "./SongList";
 import {Music} from "lucide-react-native";
 import {PlatformPressable} from "@react-navigation/elements";
+import Player from '../Player';
+import Toast from 'react-native-toast-message';
 
 export const Tab = createBottomTabNavigator();
 
@@ -43,6 +45,8 @@ export default function HomeScreen({ navigation }) {
         />
         <Tab.Screen name={'SongList2'} component={SongList} />
       </Tab.Navigator>
+      <Toast topOffset={60} />
+      <Player />
     </SafeAreaView>
   );
 }

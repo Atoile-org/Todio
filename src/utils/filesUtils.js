@@ -6,6 +6,8 @@ import {
 } from '@react-native-documents/picker';
 import * as RNFS from '@dr.pogodin/react-native-fs';
 import { getAudioMetadata } from '@missingcore/audio-metadata';
+import MaterialPalette, { createPalette } from 'react-native-material-palette';
+
 
 export async function pickAudioFiles() {
   try {
@@ -109,4 +111,10 @@ export async function getAudioMeta(path) {
     console.log(`Failed to read metadata for ${path}:`, e);
     return empty;
   }
+}
+
+export async function extractColors(image) {
+  const palette = await createPalette({ uri: image })
+  console.log(palette);
+  return palette;
 }

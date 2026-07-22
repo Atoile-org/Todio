@@ -2,6 +2,8 @@ package com.todio
 
 import android.app.Application
 import com.facebook.react.PackageList
+import org.schabi.newpipe.extractor.NewPipe
+import com.todio.youtube.YoutubeDownloader
 import com.facebook.react.ReactApplication
 import com.facebook.react.ReactHost
 import com.facebook.react.ReactNativeApplicationEntryPoint.loadReactNative
@@ -23,6 +25,7 @@ class MainApplication : Application(), ReactApplication {
 
   override fun onCreate() {
     super.onCreate()
+    NewPipe.init(YoutubeDownloader.getInstance())
     loadReactNative(this)
   }
 }

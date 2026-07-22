@@ -179,7 +179,7 @@ export default function Player() {
     })
     .onEnd(e => {
       'worklet';
-      const shouldOpen = progress.value > 0.5 || e.velocityY < -500;
+      const shouldOpen = progress.value > (full ? 0.90 : 0.10) || e.velocityY < -500;
       progress.value = withTiming(shouldOpen ? 1 : 0, { duration: DURATION });
       scheduleOnRN(setFull, shouldOpen);
     });
@@ -300,7 +300,7 @@ export default function Player() {
         source={artworkSource}
         style={styles.bg}
         resizeMode="cover"
-        blurRadius={8}
+        blurRadius={24}
         opacity={0.5}
       />
 

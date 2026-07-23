@@ -84,6 +84,7 @@ export default function SongList({ route }) {
             activeOpacity={0.6}
             onPress={() => {
               JuceBridge.audioLoadFile(item.path);
+              JuceBridge.audioPlay();
               // navigation.push("Player");
               setPlaying(item);
             }}

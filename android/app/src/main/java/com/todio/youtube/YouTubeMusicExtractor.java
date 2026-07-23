@@ -4,9 +4,11 @@ import org.schabi.newpipe.extractor.Image;
 import org.schabi.newpipe.extractor.InfoItem;
 import org.schabi.newpipe.extractor.ServiceList;
 import org.schabi.newpipe.extractor.search.SearchInfo;
+import org.schabi.newpipe.extractor.services.youtube.linkHandler.YoutubeSearchQueryHandlerFactory;
 import org.schabi.newpipe.extractor.stream.StreamInfoItem;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -19,7 +21,11 @@ public class YouTubeMusicExtractor {
     public static List<YouTubeMusicResult> searchSongs(String query, int page) throws Exception {
         SearchInfo searchInfo = SearchInfo.getInfo(
                 ServiceList.YouTube,
-                ServiceList.YouTube.getSearchQHFactory().fromQuery(query)
+                ServiceList.YouTube.getSearchQHFactory().fromQuery(
+                        query,
+                        Collections.singletonList(YoutubeSearchQueryHandlerFactory.MUSIC_SONGS),
+                        ""
+                )
         );
 
         List<YouTubeMusicResult> results = new ArrayList<>();

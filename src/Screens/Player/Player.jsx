@@ -6,6 +6,7 @@ import {
   Text,
   Pressable,
   NativeModules,
+  TouchableOpacity,
 } from 'react-native';
 import { useContext, useState, useCallback, useEffect, useRef } from 'react';
 import Animated, {
@@ -28,11 +29,14 @@ import {
   SkipForward,
   Repeat,
   Shuffle,
+  LucideAudioWaveform,
+  LucideListPlus, LucideQuote,
 } from 'lucide-react-native';
 import { TodioCtx } from '../../App';
 import { extractColors } from '../../utils/filesUtils';
 import { Shadow } from 'react-native-shadow-2';
 import Color from 'color';
+import { useNavigation } from '@react-navigation/native';
 
 const { JuceBridge } = NativeModules;
 
@@ -52,6 +56,7 @@ const formatTime = seconds => {
 export default function Player() {
   const ctx = useContext(TodioCtx);
   const { playing, theme } = ctx;
+  const navigation = useNavigation();
 
   const { height, width } = useWindowDimensions();
   const insets = useSafeAreaInsets();
@@ -372,6 +377,42 @@ export default function Player() {
         style={fullControlsStyle}
         pointerEvents={full ? 'box-none' : 'none'}
       >
+        <View style={[styles.actionRow]}>
+          <TouchableOpacity
+            activeOpacity={0.5}
+            style={[
+              styles.actionItem,
+              { backgroundColor: theme.surface, borderColor: theme.border },
+            ]}
+            onPress={() => {
+              navigation.push('Effects');
+            }}
+          >
+            <LucideAudioWaveform color={theme.textPrimary} size={24} />
+            <Text style={[{ color: theme.textPrimary }]}>Effects</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            activeOpacity={0.5}
+            style={[
+              styles.actionItem,
+              { backgroundColor: theme.surface, borderColor: theme.border },
+            ]}
+          >
+            <LucideListPlus color={theme.textPrimary} size={24} />
+            <Text style={[{ color: theme.textPrimary }]}>Save</Text>
+          </TouchableOpacity>
+          <TouchableOpacity
+            activeOpacity={0.5}
+            style={[
+              styles.actionItem,
+              { backgroundColor: theme.surface, borderColor: theme.border },
+            ]}
+          >
+            <LucideQuote color={theme.textPrimary} size={24} />
+            <Text style={[{ color: theme.textPrimary }]}>Lyrics</Text>
+          </TouchableOpacity>
+        </View>
+
         <View style={styles.timeRow} pointerEvents="none">
           <Text style={[styles.timeText, { color: theme.textSecondary }]}>
             {formatTime(safePosition)}
@@ -574,5 +615,21 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
     marginTop: 8,
+  },
+
+  actionRow: {
+    flexDirection: 'row',
+    marginBottom: 16,
+    alignItems: 'center',
+    gap: 8
+  },
+  actionItem: {
+    flexDirection: 'row',
+    gap: 8,
+    width: 'fit-content',
+    padding: 8,
+    borderRadius: 20,
+    borderWidth: 1,
+    alignItems: 'center',
   },
 });

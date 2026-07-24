@@ -44,6 +44,10 @@ export default React.memo(function SongDisplay({
 
   const artworkSource = useMemo(() => ({ uri: item.artwork }), [item.artwork]);
 
+  const buttonColor = theme?.light
+    ? actionRowPalette?.vibrant?.color || theme.textPrimary
+    : actionRowPalette?.lightVibrant?.color || theme.textPrimary;
+
   const animatedContainer = useAnimatedStyle(() => {
     return {
       height: interpolate(progress.value, [0, 1], [60, 60 * 2]),
@@ -137,7 +141,7 @@ export default React.memo(function SongDisplay({
           <Animated.View style={animatedButton}>
             <LucideListPlus
               style={styles.actionButton}
-              color={actionRowPalette?.lightVibrant.color || theme.textPrimary}
+              color={buttonColor}
               size={30}
             />
           </Animated.View>
@@ -152,7 +156,7 @@ export default React.memo(function SongDisplay({
           <Animated.View style={animatedButton}>
             <LucidePlay
               style={styles.actionButton}
-              color={actionRowPalette?.lightVibrant.color || theme.textPrimary}
+              color={buttonColor}
               size={30}
             />
           </Animated.View>
@@ -165,7 +169,7 @@ export default React.memo(function SongDisplay({
           <Animated.View style={animatedButton}>
             <LucideListEnd
               style={styles.actionButton}
-              color={actionRowPalette?.lightVibrant.color || theme.textPrimary}
+              color={buttonColor}
               size={30}
             />
           </Animated.View>
@@ -181,7 +185,7 @@ export default React.memo(function SongDisplay({
           <Animated.View style={animatedButton}>
             <LucideListStart
               style={styles.actionButton}
-              color={actionRowPalette?.lightVibrant?.color || theme.textPrimary}
+              color={buttonColor}
               size={30}
             />
           </Animated.View>

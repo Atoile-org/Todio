@@ -1,5 +1,7 @@
 export const colors = {
   light: {
+    light: true,
+
     background: '#FAF8F5',
     surface: '#FFFFFF',
     surfaceElevated: '#F2EEE8',
@@ -30,6 +32,8 @@ export const colors = {
   },
 
   dark: {
+    light: false,
+
     background: '#121014',
     surface: '#1C1A1F',
     surfaceElevated: '#242229',
@@ -61,6 +65,8 @@ export const colors = {
   },
 
   amoled: {
+    light: false,
+
     background: '#000000',
     surface: '#0A0A0A',
     surfaceElevated: '#141414',

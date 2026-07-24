@@ -6,6 +6,7 @@ import HomeScreen from './Screens/Home/HomeScreen';
 import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { NativeModules } from 'react-native';
+import Effects from './Screens/Effects/Effects';
 
 const Stack = createNativeStackNavigator();
 
@@ -14,6 +15,7 @@ export const TodioCtx = createContext()
 export default function App() {
   const [theme, setTheme] = useState(colors.amoled);
   const [playing, setPlaying] = useState();
+  const [effects, setEffects] = useState();
 
   const [playList, setPlayList] = useState([]);
 
@@ -30,6 +32,8 @@ export default function App() {
             setPlaying,
             playList,
             setPlayList,
+            effects,
+            setEffects,
           }}
         >
           <NavigationContainer>
@@ -38,7 +42,7 @@ export default function App() {
               screenOptions={{ headerShown: false }}
             >
               <Stack.Screen name="Home" component={HomeScreen} />
-
+              <Stack.Screen name="Effects" component={Effects} />
             </Stack.Navigator>
           </NavigationContainer>
         </TodioCtx.Provider>

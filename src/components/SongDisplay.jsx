@@ -17,7 +17,7 @@ import {
   LucidePlay,
   Music,
 } from 'lucide-react-native';
-import { useContext, useEffect, useState } from 'react';
+import React, { useContext, useEffect, useMemo, useState } from 'react';
 import { TodioCtx } from '../App';
 import Animated, {
   interpolate,
@@ -27,7 +27,13 @@ import Animated, {
 } from 'react-native-reanimated';
 import { extractColors } from '../utils/filesUtils';
 
-export default function SongDisplay({ item, index, selected, setSelected, setPlayList }) {
+export default React.memo(function SongDisplay({
+  item,
+  index,
+  isSelected,
+  setSelected,
+  setPlayList,
+}) {
   const { JuceBridge } = NativeModules;
   const { playing, setPlaying, theme } = useContext(TodioCtx);
 
@@ -35,6 +41,8 @@ export default function SongDisplay({ item, index, selected, setSelected, setPla
 
   const [devlopped, setDevlopped] = useState(false);
   const [actionRowPalette, setActionRowPalette] = useState();
+
+  const artworkSource = useMemo(() => ({ uri: item.artwork }), [item.artwork]);
 
   const animatedContainer = useAnimatedStyle(() => {
     return {
@@ -65,20 +73,22 @@ export default function SongDisplay({ item, index, selected, setSelected, setPla
   }, [devlopped]);
 
   useEffect(() => {
-    if (selected !== index && devlopped) {
+    if (!isSelected && devlopped) {
       progress.value = withSpring(0);
       setDevlopped(false);
     }
-  }, [selected]);
+  }, [isSelected]);
 
   return (
     <Animated.View style={[animatedContainer, styles.root]}>
-      <Animated.Image
-        source={{ uri: item.artwork }}
-        style={[styles.bg, animatedBackground]}
-        blurRadius={24}
-        resizeMode={'cover'}
-      />
+      {(devlopped || progress.value > 0) && item.artwork && (
+        <Animated.Image
+          source={artworkSource}
+          style={[styles.bg, animatedBackground]}
+          blurRadius={24}
+          resizeMode="cover"
+        />
+      )}
 
       <TouchableOpacity
         style={[styles.songRow]}
@@ -92,7 +102,7 @@ export default function SongDisplay({ item, index, selected, setSelected, setPla
       >
         {item.artwork ? (
           <Image
-            source={{ uri: item.artwork }}
+            source={artworkSource}
             style={styles.songArtwork}
             resizeMode="cover"
           />
@@ -179,7 +189,7 @@ export default function SongDisplay({ item, index, selected, setSelected, setPla
       </View>
     </Animated.View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   root: {

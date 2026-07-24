@@ -85,7 +85,7 @@ export default function SongList({ route }) {
           <SongDisplay
             item={item}
             index={index}
-            selected={selected}
+            isSelected={selected === index}
             setSelected={setSelected}
             setPlayList={setPlayList}
           />

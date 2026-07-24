@@ -17,11 +17,14 @@ import {
   pickAudioFiles,
 } from '../../utils/filesUtils';
 import {useNavigation} from "@react-navigation/native";
+import SongDisplay from '../../components/SongDisplay';
 
 export default function SongList({ route }) {
-  const { theme, setPlaying } = useContext(TodioCtx);
+  const { theme, setPlaying, setPlayList } = useContext(TodioCtx);
   const { JuceBridge } = NativeModules;
   const [songList, setSongList] = useState([]);
+
+  const [selected, setSelected] = useState();
 
   const navigation = useNavigation();
 
@@ -78,52 +81,14 @@ export default function SongList({ route }) {
             No songs yet. Tap the import icon to add some.
           </Text>
         }
-        renderItem={({ item }) => (
-          <TouchableOpacity
-            style={styles.songRow}
-            activeOpacity={0.6}
-            onPress={() => {
-              JuceBridge.audioLoadFile(item.path);
-              JuceBridge.audioPlay();
-              // navigation.push("Player");
-              setPlaying(item);
-            }}
-          >
-            {item.artwork ? (
-              <Image
-                source={{ uri: item.artwork }}
-                style={styles.songArtwork}
-                resizeMode="cover"
-              />
-            ) : (
-              <Music
-                color={theme.textPrimary}
-                size={20}
-                style={styles.songIcon}
-              />
-            )}
-            <View style={styles.songTextWrap}>
-              <Text
-                style={[styles.songTitle, { color: theme.textPrimary }]}
-                numberOfLines={1}
-              >
-                {item.name ?? item.title ?? 'Unknown title'}
-              </Text>
-              {(item.artist || item.mtime || item.year) ? (
-                <Text
-                  style={[
-                    styles.songSubtitle,
-                    { color: theme.textSecondary ?? theme.textPrimary },
-                  ]}
-                  numberOfLines={1}
-                >
-                  {(item.artist ? item.artist : 'Unknow Artist') +
-                    ' | ' +
-                    (item.year ? item.year : item.mtime)}
-                </Text>
-              ) : null}
-            </View>
-          </TouchableOpacity>
+        renderItem={({ item, index }) => (
+          <SongDisplay
+            item={item}
+            index={index}
+            selected={selected}
+            setSelected={setSelected}
+            setPlayList={setPlayList}
+          />
         )}
       />
     </View>
@@ -164,36 +129,5 @@ const styles = StyleSheet.create({
   separator: {
     height: StyleSheet.hairlineWidth,
     opacity: 0.3,
-  },
-  songRow: {
-    flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 12,
-  },
-  songIcon: {
-    marginRight: 12,
-  },
-  songTextWrap: {
-    flex: 1,
-    marginLeft: 8
-  },
-  songTitle: {
-    fontSize: 16,
-    fontWeight: '600',
-  },
-  songSubtitle: {
-    fontSize: 13,
-    opacity: 0.7,
-    marginTop: 2,
-  },
-  emptyText: {
-    textAlign: 'center',
-    marginTop: 40,
-    opacity: 0.6,
-  },
-  songArtwork: {
-    width: 40,
-    height: 40,
-    borderRadius: 10,
   },
 });

@@ -14,6 +14,9 @@ export const TodioCtx = createContext()
 export default function App() {
   const [theme, setTheme] = useState(colors.amoled);
   const [playing, setPlaying] = useState();
+
+  const [playList, setPlayList] = useState([]);
+
   const { YouTubeMusicBridge } = NativeModules;
 
   return (
@@ -25,6 +28,8 @@ export default function App() {
             setTheme,
             playing,
             setPlaying,
+            playList,
+            setPlayList,
           }}
         >
           <NavigationContainer>

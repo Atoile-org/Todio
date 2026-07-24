@@ -189,6 +189,7 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     alignItems: 'center',
     paddingVertical: 12,
+    marginHorizontal: 16,
   },
   songIcon: {
     marginRight: 12,

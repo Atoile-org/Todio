@@ -122,7 +122,7 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   listContent: {
-    paddingHorizontal: 16,
+    paddingHorizontal: 0,
     paddingBottom: 24,
     flexGrow: 1,
   },

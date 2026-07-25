@@ -46,3 +46,25 @@ Java_com_todio_JuceBridge_isPlaying(JNIEnv*, jclass) {
     if (engine) return engine->isPlaying();
     return false;
 }
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_todio_JuceBridge_setReverb(JNIEnv*, jclass, jfloat roomSize, jfloat damping, jfloat wetLevel, jfloat dryLevel, jfloat width, jfloat freezeMode) {
+    juce::dsp::Reverb::Parameters params;
+    params.roomSize = roomSize;
+    params.damping = damping;
+    params.wetLevel = wetLevel;
+    params.dryLevel = dryLevel;
+    params.width = width;
+    params.freezeMode = freezeMode;
+
+    if (engine) {
+        engine->setReverbParameters(params);
+    }
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_todio_JuceBridge_setReverbBypass(JNIEnv*, jclass, jboolean bypass) {
+    if (engine) {
+        engine->setReverbBypassed(bypass);
+    }
+}

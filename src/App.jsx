@@ -19,7 +19,12 @@ export default function App() {
 
   const [playList, setPlayList] = useState([]);
 
-  const { YouTubeMusicBridge } = NativeModules;
+  const { JuceBridge } = NativeModules;
+
+  useEffect(() => {
+    JuceBridge.setResamplingRatio(1);
+    JuceBridge.setReverbBypass(true);
+  }, [JuceBridge])
 
   return (
     <SafeAreaProvider>

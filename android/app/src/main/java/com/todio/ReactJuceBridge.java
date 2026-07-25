@@ -44,6 +44,16 @@ public class ReactJuceBridge extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void setReverb(float roomSize, float damping, float wetLevel, float dryLevel, float width, float freezeMode) {
+        JuceBridge.setReverb(roomSize, damping, wetLevel, dryLevel, width, freezeMode);
+    }
+
+    @ReactMethod
+    public void setReverbBypass(boolean bypass) {
+        JuceBridge.setReverbBypass(bypass);
+    }
+
+    @ReactMethod
     public void getCurrentPosition(Promise promise) {
         try {
             promise.resolve(JuceBridge.getCurrentPosition());

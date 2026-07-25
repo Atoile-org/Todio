@@ -20,4 +20,6 @@ public class JuceBridge {
     public static native double getCurrentPosition();
     public static native double getLengthInSeconds();
     public static native boolean isPlaying();
+    public static native void setReverb(float roomSize, float damping, float wetLevel, float dryLevel, float width, float freezeMode);
+    public static native void setReverbBypass(boolean bypass);
 }

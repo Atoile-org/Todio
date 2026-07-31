@@ -132,12 +132,22 @@ export default function Effects() {
 
   function handlePreset(preset) {
     setSpeed(preset.speed);
-    if (preset?.reverb?.enable) {
-      const reverb = preset.reverb;
+    JuceBridge.setResamplingRatio(preset.speed);
+
+    const presetReverb = preset?.reverb;
+    const enabled = !!presetReverb?.enable;
+
+    if (enabled) {
+      const next = { ...DEFAULT_REVERB, ...presetReverb };
+      setReverb(next);
       setReverbEnabled(true);
-      setReverb(reverb);
+      JuceBridge.setReverbBypass(false);
+      pushReverbToNative(next);
+      setEffects({ ...effects, speed: preset.speed, reverb: { ...next, enabled: true } });
     } else {
       setReverbEnabled(false);
+      JuceBridge.setReverbBypass(true);
+      setEffects({ ...effects, speed: preset.speed, reverb: { ...reverb, enabled: false } });
     }
   }
 
@@ -181,7 +191,7 @@ export default function Effects() {
                 <Text style={{ color: theme.textPrimary }}>{item.name}</Text>
               </Pressable>
             </View>
-          ))}{' '}
+          ))}
       </ScrollView>
 
       <View

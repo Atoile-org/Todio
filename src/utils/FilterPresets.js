@@ -1,5 +1,12 @@
 export const DEFAULT_PRESETS = [
   {
+    name: 'None',
+    speed: 1,
+    reverb: {
+      enable: false,
+    },
+  },
+  {
     name: 'DayCore',
     speed: 0.7,
     reverb: {
@@ -29,7 +36,7 @@ export const DEFAULT_PRESETS = [
   },
   {
     name: 'FogCore',
-    speed: 0.8,
+    speed: 0.7,
     reverb: {
       enable: true,
       roomSize: 0.5,

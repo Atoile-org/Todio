@@ -1,9 +1,18 @@
 import Slider from '@react-native-community/slider';
-import { NativeModules, StyleSheet, Switch, Text, View } from 'react-native';
+import {
+  NativeModules, Pressable,
+  ScrollView,
+  StyleSheet,
+  Switch,
+  Text,
+  View,
+} from 'react-native';
 import { useContext, useState } from 'react';
 import { TodioCtx } from '../../App';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LucideAudioWaveform } from 'lucide-react-native';
+import { DEFAULT_PRESETS } from '../../utils/FilterPresets';
+import { preset } from '../../../jest.config';
 
 const DEFAULT_REVERB = {
   roomSize: 0.40,
@@ -121,6 +130,17 @@ export default function Effects() {
     setEffects({ ...effects, reverb: { ...reverb, enabled } });
   };
 
+  function handlePreset(preset) {
+    setSpeed(preset.speed);
+    if (preset?.reverb?.enable) {
+      const reverb = preset.reverb;
+      setReverbEnabled(true);
+      setReverb(reverb);
+    } else {
+      setReverbEnabled(false);
+    }
+  }
+
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: theme.background }]}
@@ -131,6 +151,38 @@ export default function Effects() {
           Effects
         </Text>
       </View>
+
+      <ScrollView
+        horizontal
+        showsHorizontalScrollIndicator={false}
+        style={{ flexGrow: 0 }}
+        contentContainerStyle={styles.presetContainer}
+      >
+        {DEFAULT_PRESETS.map((item, index) => (
+            <View
+              style={{
+                borderRadius: 50,
+                overflow: 'hidden',
+                borderColor: theme.border,
+                borderWidth: 1,
+                marginLeft: index === 0 ? 16 : 0
+              }}
+            >
+              <Pressable
+                style={[
+                  {
+                    backgroundColor: theme.surface,
+                  },
+                  styles.presetElement,
+                ]}
+                android_ripple={{ color: theme.accentMuted }}
+                onPress={() => handlePreset(item)}
+              >
+                <Text style={{ color: theme.textPrimary }}>{item.name}</Text>
+              </Pressable>
+            </View>
+          ))}{' '}
+      </ScrollView>
 
       <View
         style={[
@@ -273,4 +325,15 @@ const styles = StyleSheet.create({
   disabledText: {
     opacity: 0.4,
   },
+
+  presetContainer: {
+    flexDirection: 'row',
+    gap: 10,
+  },
+  presetElement: {
+    paddingHorizontal: 16,
+    paddingVertical: 12,
+    borderWidth: 1,
+    borderRadius: 50
+  }
 });

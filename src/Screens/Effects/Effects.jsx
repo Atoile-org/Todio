@@ -7,10 +7,10 @@ import { LucideAudioWaveform } from 'lucide-react-native';
 
 const DEFAULT_REVERB = {
   roomSize: 0.40,
-  damping: 0.60,
+  damping: 1,
   wetLevel: 0.45,
-  dryLevel: 0.50,
-  width: 0.40,
+  dryLevel: 0.35,
+  width: 1,
   freezeMode: 0,
 };
 

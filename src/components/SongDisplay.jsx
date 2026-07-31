@@ -26,6 +26,7 @@ import Animated, {
   withSpring,
 } from 'react-native-reanimated';
 import { extractColors } from '../utils/filesUtils';
+import * as AudioPlayer from '../utils/AudioPlayer';
 
 export default React.memo(function SongDisplay({
   item,
@@ -163,7 +164,7 @@ export default React.memo(function SongDisplay({
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => {
-            setPlayList(p => [...p, item]);
+            AudioPlayer.addSong(item)
           }}
         >
           <Animated.View style={animatedButton}>
@@ -176,10 +177,7 @@ export default React.memo(function SongDisplay({
         </TouchableOpacity>
         <TouchableOpacity
           onPress={() => {
-            JuceBridge.audioLoadFile(item.path);
-            JuceBridge.audioPlay();
-            setPlayList(p => [item, ...p]);
-            setPlaying(item);
+            AudioPlayer.addSong(item, true);
           }}
         >
           <Animated.View style={animatedButton}>

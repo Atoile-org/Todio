@@ -9,19 +9,12 @@ if(NOT EXISTS "${JUCE_DIR}/modules")
     message(FATAL_ERROR "Couldn't find JUCE modules at ${JUCE_DIR}/modules - check the path")
 endif()
 
-# JUCE (8.x) ships a JUCE_MODULES_ONLY option that makes its own CMakeLists.txt
-# return right after registering juce_add_module()/module targets, skipping
-# extras/Build entirely. That means it never tries to build juceaide or any
-# other host-side tool - exactly what we want for a modules-only Android build.
 set(JUCE_MODULES_ONLY ON CACHE BOOL "" FORCE)
 add_subdirectory(${JUCE_DIR} EXCLUDE_FROM_ALL)
 
-# ---------------------------------------------------------------------------
-# The actual .so loaded from Kotlin/Java via System.loadLibrary("todio_juce")
-# Add any of your own .cpp files to this list alongside juce_jni_bridge.cpp.
-# ---------------------------------------------------------------------------
 add_library(todio_juce SHARED
     juce_jni_bridge.cpp
+    JuceEvents.cpp
 )
 
 target_link_libraries(todio_juce PRIVATE

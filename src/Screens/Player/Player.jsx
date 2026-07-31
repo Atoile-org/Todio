@@ -37,6 +37,7 @@ import { extractColors } from '../../utils/filesUtils';
 import { Shadow } from 'react-native-shadow-2';
 import Color from 'color';
 import { useNavigation } from '@react-navigation/native';
+import * as AudioPlayer from '../../utils/AudioPlayer';
 
 const { JuceBridge } = NativeModules;
 
@@ -152,14 +153,12 @@ export default function Player() {
   }, []);
 
   const skipForward = useCallback(() => {
-    const newPos = Math.min(safePosition + 10, duration);
-    handleSeek(newPos);
-  }, [safePosition, duration, handleSeek]);
+    AudioPlayer.next()
+  }, []);
 
   const skipBack = useCallback(() => {
-    const newPos = Math.max(safePosition - 10, 0);
-    handleSeek(newPos);
-  }, [safePosition, handleSeek]);
+    AudioPlayer.prev()
+  }, []);
 
   const noop = useCallback(() => {}, []);
 

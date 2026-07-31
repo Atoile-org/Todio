@@ -4,7 +4,13 @@
 namespace { std::unique_ptr<AudioEngine> engine; }
 
 extern "C" JNIEXPORT void JNICALL
-Java_com_todio_JuceBridge_audioInit(JNIEnv*, jclass) {
+Java_com_todio_JuceBridge_audioInit(JNIEnv* env, jclass) {
+    JavaVM* vm = nullptr;
+    env->GetJavaVM(&vm);
+    InitJuceEvents(vm, env);
+
+    juce::MessageManager::getInstance();
+
     engine = std::make_unique<AudioEngine>();
 }
 

@@ -20,6 +20,7 @@ public class JuceBridgePackage implements ReactPackage {
     public List<NativeModule> createNativeModules(@NonNull ReactApplicationContext reactContext) {
         List<NativeModule> modules = new ArrayList<>();
         modules.add(new ReactJuceBridge());
+        modules.add(new JuceEvents(reactContext));
         modules.add(new ReactYouTubeMusicBridge(reactContext));
         modules.add(new ReactAudioExtractorBridge(reactContext));
         modules.add(new ReactYouTubeProfilePictureBridge(reactContext));

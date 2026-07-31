@@ -2,11 +2,11 @@
 #include <juce_audio_basics/juce_audio_basics.h>
 #include <juce_audio_devices/juce_audio_devices.h>
 #include <juce_audio_formats/juce_audio_formats.h>
-#include  "ProcessorChainAudioSource.h"
-
+#include "ProcessorChainAudioSource.h"
 #include "juce_dsp/juce_dsp.h"
+#include "JuceEvents.h"
 
-class AudioEngine
+class AudioEngine : public juce::ChangeListener
 {
 public:
     using ReverbChain = juce::dsp::ProcessorChain<juce::dsp::Reverb>;
@@ -23,10 +23,12 @@ public:
 
         sourcePlayer.setSource(&reverbSource);
         deviceManager.addAudioCallback(&sourcePlayer);
+        transportSource.addChangeListener(this);
     }
 
     ~AudioEngine()
     {
+        transportSource.removeChangeListener(this);
         deviceManager.removeAudioCallback(&sourcePlayer);
         sourcePlayer.setSource(nullptr);
         resamplingSource.releaseResources();
@@ -50,8 +52,8 @@ public:
     void play()  { transportSource.start(); }
     void pause() { transportSource.stop(); }
     void stop()  { transportSource.stop(); transportSource.setPosition(0.0); }
-    void setPosition( double position )  { transportSource.setPosition( position ); }
-    void setLooping( double looping )  { transportSource.setLooping( looping ); }
+    void setPosition(double position) { transportSource.setPosition(position); }
+    void setLooping(bool looping) { transportSource.setLooping(looping); }
 
     double getCurrentPosition() { return transportSource.getCurrentPosition(); }
     double getLengthInSeconds() { return transportSource.getLengthInSeconds(); }
@@ -70,6 +72,31 @@ public:
     void setReverbBypassed(bool shouldBeBypassed)
     {
         reverbSource.getChain().setBypassed<0>(shouldBeBypassed);
+    }
+
+    void changeListenerCallback(juce::ChangeBroadcaster* source) override
+    {
+        if (source != &transportSource)
+            return;
+
+        const bool finished = transportSource.hasStreamFinished();
+        const bool playing  = transportSource.isPlaying();
+
+        juce::MessageManager::callAsync([finished, playing]()
+        {
+            if (finished)
+            {
+                StatusChangeEvent("end");
+            }
+            else if (playing)
+            {
+                StatusChangeEvent("playing");
+            }
+            else
+            {
+                StatusChangeEvent("paused");
+            }
+        });
     }
 
 private:

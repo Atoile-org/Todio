@@ -7,6 +7,13 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
 import { NativeModules } from 'react-native';
 import Effects from './Screens/Effects/Effects';
+import {
+  listeners,
+  onIndexChanged,
+  onPlaylistChanged,
+  playlist,
+} from './utils/AudioPlayer';
+import * as AudioPlayer from './utils/AudioPlayer';
 
 const Stack = createNativeStackNavigator();
 
@@ -19,12 +26,19 @@ export default function App() {
 
   const [playList, setPlayList] = useState([]);
 
+  listeners.onPlaylistChanged = () => setPlayList(AudioPlayer.playlist);
+  listeners.onIndexChanged = () => setPlaying(playList[AudioPlayer.index]);
+
   const { JuceBridge } = NativeModules;
 
   useEffect(() => {
     JuceBridge.setResamplingRatio(1);
     JuceBridge.setReverbBypass(true);
   }, [JuceBridge])
+
+  useEffect(() => {
+    AudioPlayer.setup();
+  }, [])
 
   return (
     <SafeAreaProvider>

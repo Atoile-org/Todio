@@ -20,8 +20,6 @@ class MainActivity : ReactActivity() {
     private const val TAG = "JuceBridge"
   }
 
-  // Must be registered before the activity reaches STARTED, so it's a
-  // class-level property rather than something created inside onCreate().
   private val pickAudioFile =
       registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         if (uri != null) {
@@ -45,14 +43,11 @@ class MainActivity : ReactActivity() {
       DefaultReactActivityDelegate(this, mainComponentName, fabricEnabled)
 
   override fun onCreate(savedInstanceState: Bundle?) {
-    // RN activities are conventionally started with null here to avoid
-    // fragment-restoration issues with the RN view hierarchy.
     super.onCreate(null)
 
     Java.initialiseJUCE(applicationContext)
 
     JuceBridge.audioInit()
-    pickAudioFile.launch("audio/*")
   }
 
   /**

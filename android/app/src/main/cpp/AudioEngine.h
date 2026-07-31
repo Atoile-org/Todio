@@ -9,7 +9,11 @@
 class AudioEngine : public juce::ChangeListener
 {
 public:
-    using ReverbChain = juce::dsp::ProcessorChain<juce::dsp::Reverb>;
+    using FilterDuplicator = juce::dsp::ProcessorDuplicator<juce::dsp::IIR::Filter<float>,
+                                                              juce::dsp::IIR::Coefficients<float>>;
+    using ReverbChain = juce::dsp::ProcessorChain<FilterDuplicator,
+                                                   FilterDuplicator,
+                                                   juce::dsp::Reverb>;
 
     AudioEngine()
         : resamplingSource(&transportSource, false, 2)
@@ -24,6 +28,11 @@ public:
         sourcePlayer.setSource(&reverbSource);
         deviceManager.addAudioCallback(&sourcePlayer);
         transportSource.addChangeListener(this);
+
+        prepareFilters();
+
+        setHighPassFrequency(20.0f, 0.707f);
+        setLowPassFrequency(20000.0f, 0.707f);
     }
 
     ~AudioEngine()
@@ -64,14 +73,40 @@ public:
         resamplingSource.setResamplingRatio(juce::jlimit(0.1, 4.0, ratio));
     }
 
+    void setHighPassFrequency(float frequencyHz, float resonanceQ)
+    {
+        const float nyquistGuard = (float) getSampleRate() * 0.49f;
+        highPassFreq = juce::jlimit(10.0f, nyquistGuard, frequencyHz);
+        highPassRes  = juce::jlimit(0.1f, 20.0f, resonanceQ);
+        updateHighPassCoefficients();
+    }
+
+    void setLowPassFrequency(float frequencyHz, float resonanceQ)
+    {
+        const float nyquistGuard = (float) getSampleRate() * 0.49f;
+        lowPassFreq = juce::jlimit(10.0f, nyquistGuard, frequencyHz);
+        lowPassRes  = juce::jlimit(0.1f, 20.0f, resonanceQ);
+        updateLowPassCoefficients();
+    }
+
+    void setHighPassBypassed(bool shouldBeBypassed)
+    {
+        reverbSource.getChain().setBypassed<0>(shouldBeBypassed);
+    }
+
+    void setLowPassBypassed(bool shouldBeBypassed)
+    {
+        reverbSource.getChain().setBypassed<1>(shouldBeBypassed);
+    }
+
     void setReverbParameters(const juce::dsp::Reverb::Parameters& params)
     {
-        reverbSource.getChain().get<0>().setParameters(params);
+        reverbSource.getChain().get<2>().setParameters(params);
     }
 
     void setReverbBypassed(bool shouldBeBypassed)
     {
-        reverbSource.getChain().setBypassed<0>(shouldBeBypassed);
+        reverbSource.getChain().setBypassed<2>(shouldBeBypassed);
     }
 
     void changeListenerCallback(juce::ChangeBroadcaster* source) override
@@ -100,6 +135,52 @@ public:
     }
 
 private:
+    void prepareFilters()
+    {
+        juce::dsp::ProcessSpec spec;
+        spec.sampleRate = getSampleRate();
+        spec.maximumBlockSize = 512;
+        spec.numChannels = 2;
+
+        if (auto* device = deviceManager.getCurrentAudioDevice())
+        {
+            spec.maximumBlockSize = (juce::uint32) juce::jmax(1, device->getCurrentBufferSizeSamples());
+            const auto activeOutputs = device->getActiveOutputChannels().countNumberOfSetBits();
+            spec.numChannels = (juce::uint32) juce::jmax(1, activeOutputs);
+        }
+
+        reverbSource.getChain().get<0>().prepare(spec);
+        reverbSource.getChain().get<1>().prepare(spec);
+    }
+
+    double getSampleRate() const
+    {
+        if (auto* device = deviceManager.getCurrentAudioDevice())
+        {
+            const double sr = device->getCurrentSampleRate();
+            if (sr > 0.0)
+                return sr;
+        }
+        return 44100.0;
+    }
+
+    void updateHighPassCoefficients()
+    {
+        *reverbSource.getChain().get<0>().state =
+            *juce::dsp::IIR::Coefficients<float>::makeHighPass(getSampleRate(), highPassFreq, highPassRes);
+    }
+
+    void updateLowPassCoefficients()
+    {
+        *reverbSource.getChain().get<1>().state =
+            *juce::dsp::IIR::Coefficients<float>::makeLowPass(getSampleRate(), lowPassFreq, lowPassRes);
+    }
+
+    float highPassFreq = 20.0f;
+    float lowPassFreq  = 20000.0f;
+    float highPassRes  = 0.707f;
+    float lowPassRes   = 0.707f;
+
     juce::AudioFormatManager formatManager;
     juce::AudioDeviceManager deviceManager;
     juce::AudioSourcePlayer sourcePlayer;

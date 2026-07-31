@@ -74,3 +74,31 @@ Java_com_todio_JuceBridge_setReverbBypass(JNIEnv*, jclass, jboolean bypass) {
         engine->setReverbBypassed(bypass);
     }
 }
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_todio_JuceBridge_setHighPassFrequency(JNIEnv*, jclass, jfloat frequencyHz, jfloat resonanceQ) {
+    if (engine) {
+        engine->setHighPassFrequency(frequencyHz, resonanceQ);
+    }
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_todio_JuceBridge_setLowPassFrequency(JNIEnv*, jclass, jfloat frequencyHz, jfloat resonanceQ) {
+    if (engine) {
+        engine->setLowPassFrequency(frequencyHz, resonanceQ);
+    }
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_todio_JuceBridge_setHighPassBypass(JNIEnv*, jclass, jboolean bypass) {
+    if (engine) {
+        engine->setHighPassBypassed(bypass);
+    }
+}
+
+extern "C" JNIEXPORT void JNICALL
+Java_com_todio_JuceBridge_setLowPassBypass(JNIEnv*, jclass, jboolean bypass) {
+    if (engine) {
+        engine->setLowPassBypassed(bypass);
+    }
+}

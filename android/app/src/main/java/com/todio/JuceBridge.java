@@ -22,4 +22,8 @@ public class JuceBridge {
     public static native boolean isPlaying();
     public static native void setReverb(float roomSize, float damping, float wetLevel, float dryLevel, float width, float freezeMode);
     public static native void setReverbBypass(boolean bypass);
+    public static native void setHighPassFrequency(float frequencyHz, float resonanceQ);
+    public static native void setLowPassFrequency(float frequencyHz, float resonanceQ);
+    public static native void setHighPassBypass(boolean bypass);
+    public static native void setLowPassBypass(boolean bypass);
 }

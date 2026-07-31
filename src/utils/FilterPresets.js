@@ -5,11 +5,23 @@ export const DEFAULT_PRESETS = [
     reverb: {
       enable: false,
     },
+    hpf: {
+      enable: false,
+    },
+    lpf: {
+      enable: false,
+    },
   },
   {
     name: 'DayCore',
     speed: 0.7,
     reverb: {
+      enable: false,
+    },
+    hpf: {
+      enable: false,
+    },
+    lpf: {
       enable: false,
     },
   },
@@ -19,6 +31,12 @@ export const DEFAULT_PRESETS = [
     reverb: {
       enable: false,
     },
+    hpf: {
+      enable: false,
+    },
+    lpf: {
+      enable: false,
+    },
   },
   {
     name: 'EveningCore',
@@ -26,11 +44,23 @@ export const DEFAULT_PRESETS = [
     reverb: {
       enable: false,
     },
+    hpf: {
+      enable: false,
+    },
+    lpf: {
+      enable: false,
+    },
   },
   {
     name: 'NightCore',
     speed: 1.3,
     reverb: {
+      enable: false,
+    },
+    hpf: {
+      enable: false,
+    },
+    lpf: {
       enable: false,
     },
   },
@@ -41,10 +71,20 @@ export const DEFAULT_PRESETS = [
       enable: true,
       roomSize: 0.5,
       damping: 0.85,
-      wetLevel: 0.55,
+      wetLevel: 0.7,
       dryLevel: 0.25,
       width: 1.0,
       freezeMode: 0,
+    },
+    hpf: {
+      enable: true,
+      frequency: 150,
+      resonance: 0.7,
+    },
+    lpf: {
+      enable: true,
+      frequency: 12500,
+      resonance: 0.35,
     },
   },
   {
@@ -53,11 +93,19 @@ export const DEFAULT_PRESETS = [
     reverb: {
       enable: true,
       roomSize: 0.85,
-      damping: 0.25,
+      damping: 0.6,
       wetLevel: 0.5,
       dryLevel: 0.3,
-      width: 0.4,
+      width: 0.2,
       freezeMode: 0,
+    },
+    hpf: {
+      enable: true,
+      frequency: 80,
+      resonance: 0.3,
+    },
+    lpf: {
+      enable: false,
     },
   },
 ];

@@ -54,6 +54,26 @@ public class ReactJuceBridge extends ReactContextBaseJavaModule {
     }
 
     @ReactMethod
+    public void setHighPassFrequency(float frequencyHz, float resonanceQ) {
+        JuceBridge.setHighPassFrequency(frequencyHz, resonanceQ);
+    }
+
+    @ReactMethod
+    public void setLowPassFrequency(float frequencyHz, float resonanceQ) {
+        JuceBridge.setLowPassFrequency(frequencyHz, resonanceQ);
+    }
+
+    @ReactMethod
+    public void setHighPassBypass(boolean bypass) {
+        JuceBridge.setHighPassBypass(bypass);
+    }
+
+    @ReactMethod
+    public void setLowPassBypass(boolean bypass) {
+        JuceBridge.setLowPassBypass(bypass);
+    }
+
+    @ReactMethod
     public void getCurrentPosition(Promise promise) {
         try {
             promise.resolve(JuceBridge.getCurrentPosition());

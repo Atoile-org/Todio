@@ -1,6 +1,7 @@
 import Slider from '@react-native-community/slider';
 import {
-  NativeModules, Pressable,
+  NativeModules,
+  Pressable,
   ScrollView,
   StyleSheet,
   Switch,
@@ -12,15 +13,21 @@ import { TodioCtx } from '../../App';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import { LucideAudioWaveform } from 'lucide-react-native';
 import { DEFAULT_PRESETS } from '../../utils/FilterPresets';
-import { preset } from '../../../jest.config';
 
 const DEFAULT_REVERB = {
-  roomSize: 0.40,
+  roomSize: 0.4,
   damping: 1,
   wetLevel: 0.45,
   dryLevel: 0.35,
   width: 1,
   freezeMode: 0,
+};
+
+const DEFAULT_FILTERS = {
+  highPass: 20,
+  highPassQ: 0.707,
+  lowPass: 20000,
+  lowPassQ: 0.707,
 };
 
 function LabeledSwitch({ label, value, onValueChange, disabled }) {
@@ -101,6 +108,59 @@ export default function Effects() {
     ...effects?.reverb,
   });
 
+  const [highPassEnabled, setHighPassEnabled] = useState(
+    effects?.filters?.highPassEnabled ?? false,
+  );
+  const [lowPassEnabled, setLowPassEnabled] = useState(
+    effects?.filters?.lowPassEnabled ?? false,
+  );
+  const [filters, setFilters] = useState({
+    ...DEFAULT_FILTERS,
+    ...effects?.filters,
+  });
+
+  const pushHighPassToNative = next => {
+    JuceBridge.setHighPassFrequency(next.highPass, next.highPassQ);
+  };
+
+  const pushLowPassToNative = next => {
+    JuceBridge.setLowPassFrequency(next.lowPass, next.lowPassQ);
+  };
+
+  const updateFilterParam = (key, v) => {
+    const next = { ...filters, [key]: v };
+    setFilters(next);
+    if (key === 'highPass' || key === 'highPassQ') pushHighPassToNative(next);
+    else pushLowPassToNative(next);
+  };
+
+  const commitFilters = next => {
+    setEffects({
+      ...effects,
+      filters: { ...next, highPassEnabled, lowPassEnabled },
+    });
+  };
+
+  const handleHighPassToggle = enabled => {
+    setHighPassEnabled(enabled);
+    JuceBridge.setHighPassBypass(!enabled);
+    if (enabled) pushHighPassToNative(filters);
+    setEffects({
+      ...effects,
+      filters: { ...filters, highPassEnabled: enabled, lowPassEnabled },
+    });
+  };
+
+  const handleLowPassToggle = enabled => {
+    setLowPassEnabled(enabled);
+    JuceBridge.setLowPassBypass(!enabled);
+    if (enabled) pushLowPassToNative(filters);
+    setEffects({
+      ...effects,
+      filters: { ...filters, lowPassEnabled: enabled, highPassEnabled },
+    });
+  };
+
   const pushReverbToNative = next => {
     JuceBridge.setReverb(
       next.roomSize,
@@ -135,145 +195,270 @@ export default function Effects() {
     JuceBridge.setResamplingRatio(preset.speed);
 
     const presetReverb = preset?.reverb;
-    const enabled = !!presetReverb?.enable;
+    const reverbOn = !!presetReverb?.enable;
 
-    if (enabled) {
-      const next = { ...DEFAULT_REVERB, ...presetReverb };
-      setReverb(next);
+    let nextReverb;
+    if (reverbOn) {
+      nextReverb = { ...DEFAULT_REVERB, ...presetReverb };
+      setReverb(nextReverb);
       setReverbEnabled(true);
       JuceBridge.setReverbBypass(false);
-      pushReverbToNative(next);
-      setEffects({ ...effects, speed: preset.speed, reverb: { ...next, enabled: true } });
+      pushReverbToNative(nextReverb);
     } else {
+      nextReverb = reverb;
       setReverbEnabled(false);
       JuceBridge.setReverbBypass(true);
-      setEffects({ ...effects, speed: preset.speed, reverb: { ...reverb, enabled: false } });
     }
+
+    const presetHpf = preset?.hpf;
+    const highPassOn = !!presetHpf?.enable;
+
+    const presetLpf = preset?.lpf;
+    const lowPassOn = !!presetLpf?.enable;
+
+    const nextFilters = {
+      ...filters,
+      ...(highPassOn && {
+        highPass: presetHpf.frequency ?? filters.highPass,
+        highPassQ: presetHpf.resonance ?? filters.highPassQ,
+      }),
+      ...(lowPassOn && {
+        lowPass: presetLpf.frequency ?? filters.lowPass,
+        lowPassQ: presetLpf.resonance ?? filters.lowPassQ,
+      }),
+    };
+    setFilters(nextFilters);
+
+    setHighPassEnabled(highPassOn);
+    JuceBridge.setHighPassBypass(!highPassOn);
+    if (highPassOn) pushHighPassToNative(nextFilters);
+
+    setLowPassEnabled(lowPassOn);
+    JuceBridge.setLowPassBypass(!lowPassOn);
+    if (lowPassOn) pushLowPassToNative(nextFilters);
+
+    setEffects({
+      ...effects,
+      speed: preset.speed,
+      reverb: { ...nextReverb, enabled: reverbOn },
+      filters: {
+        ...nextFilters,
+        highPassEnabled: highPassOn,
+        lowPassEnabled: lowPassOn,
+      },
+    });
   }
 
   return (
     <SafeAreaView
       style={[styles.container, { backgroundColor: theme.background }]}
     >
-      <View style={styles.header}>
-        <LucideAudioWaveform color={theme.textPrimary} size={30} />
-        <Text style={[styles.topText, { color: theme.textPrimary }]}>
-          Effects
-        </Text>
-      </View>
+      <ScrollView>
+        <View>
+          <View style={styles.header}>
+            <LucideAudioWaveform color={theme.textPrimary} size={30} />
+            <Text style={[styles.topText, { color: theme.textPrimary }]}>
+              Effects
+            </Text>
+          </View>
 
-      <ScrollView
-        horizontal
-        showsHorizontalScrollIndicator={false}
-        style={{ flexGrow: 0 }}
-        contentContainerStyle={styles.presetContainer}
-      >
-        {DEFAULT_PRESETS.map((item, index) => (
-            <View
-              style={{
-                borderRadius: 50,
-                overflow: 'hidden',
-                borderColor: theme.border,
-                borderWidth: 1,
-                marginLeft: index === 0 ? 16 : 0
-              }}
-            >
-              <Pressable
-                style={[
-                  {
-                    backgroundColor: theme.surface,
-                  },
-                  styles.presetElement,
-                ]}
-                android_ripple={{ color: theme.accentMuted }}
-                onPress={() => handlePreset(item)}
+          <ScrollView
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            style={{ flexGrow: 0 }}
+            contentContainerStyle={styles.presetContainer}
+          >
+            {DEFAULT_PRESETS.map((item, index) => (
+              <View
+                style={{
+                  borderRadius: 50,
+                  overflow: 'hidden',
+                  borderColor: theme.border,
+                  borderWidth: 1,
+                  marginLeft: index === 0 ? 16 : 0,
+                }}
               >
-                <Text style={{ color: theme.textPrimary }}>{item.name}</Text>
-              </Pressable>
+                <Pressable
+                  style={[
+                    {
+                      backgroundColor: theme.surface,
+                    },
+                    styles.presetElement,
+                  ]}
+                  android_ripple={{ color: theme.accentMuted }}
+                  onPress={() => handlePreset(item)}
+                >
+                  <Text style={{ color: theme.textPrimary }}>{item.name}</Text>
+                </Pressable>
+              </View>
+            ))}
+          </ScrollView>
+
+          <View
+            style={[
+              styles.section,
+              { backgroundColor: theme.card ?? theme.background },
+            ]}
+          >
+            <EffectSlider
+              label="Speed"
+              value={speed}
+              minimumValue={0.1}
+              maximumValue={4}
+              step={0.05}
+              onValueChange={v => {
+                setSpeed(v);
+                JuceBridge.setResamplingRatio(v);
+              }}
+              onSlidingComplete={v => setEffects({ ...effects, speed: v })}
+            />
+          </View>
+
+          <View
+            style={[
+              styles.section,
+              { backgroundColor: theme.card ?? theme.background },
+            ]}
+          >
+            <View style={styles.sectionHeaderRow}>
+              <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
+                High-Pass Filter
+              </Text>
+              <Switch
+                value={highPassEnabled}
+                onValueChange={handleHighPassToggle}
+              />
             </View>
-          ))}
-      </ScrollView>
 
-      <View
-        style={[
-          styles.section,
-          { backgroundColor: theme.card ?? theme.background },
-        ]}
-      >
-        <EffectSlider
-          label="Speed"
-          value={speed}
-          minimumValue={0.1}
-          maximumValue={4}
-          step={0.05}
-          onValueChange={v => {
-            setSpeed(v);
-            JuceBridge.setResamplingRatio(v);
-          }}
-          onSlidingComplete={v => setEffects({ ...effects, speed: v })}
-        />
-      </View>
+            <EffectSlider
+              label="Frequency"
+              value={filters.highPass}
+              disabled={!highPassEnabled}
+              minimumValue={20}
+              maximumValue={5000}
+              step={1}
+              formatValue={v => `${Math.round(v)} Hz`}
+              onValueChange={v => updateFilterParam('highPass', v)}
+              onSlidingComplete={() => commitFilters(filters)}
+            />
+            <EffectSlider
+              label="Resonance"
+              value={filters.highPassQ}
+              disabled={!highPassEnabled}
+              minimumValue={0.1}
+              maximumValue={18}
+              step={0.01}
+              formatValue={v => Number(v).toFixed(2)}
+              onValueChange={v => updateFilterParam('highPassQ', v)}
+              onSlidingComplete={() => commitFilters(filters)}
+            />
+          </View>
 
-      <View
-        style={[
-          styles.section,
-          { backgroundColor: theme.card ?? theme.background },
-        ]}
-      >
-        <View style={styles.sectionHeaderRow}>
-          <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
-            Reverb
-          </Text>
-          <Switch value={reverbEnabled} onValueChange={handleReverbToggle} />
+          <View
+            style={[
+              styles.section,
+              { backgroundColor: theme.card ?? theme.background },
+            ]}
+          >
+            <View style={styles.sectionHeaderRow}>
+              <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
+                Low-Pass Filter
+              </Text>
+              <Switch
+                value={lowPassEnabled}
+                onValueChange={handleLowPassToggle}
+              />
+            </View>
+
+            <EffectSlider
+              label="Frequency"
+              value={filters.lowPass}
+              disabled={!lowPassEnabled}
+              minimumValue={5000}
+              maximumValue={20000}
+              step={1}
+              formatValue={v => `${Math.round(v)} Hz`}
+              onValueChange={v => updateFilterParam('lowPass', v)}
+              onSlidingComplete={() => commitFilters(filters)}
+            />
+            <EffectSlider
+              label="Resonance"
+              value={filters.lowPassQ}
+              disabled={!lowPassEnabled}
+              minimumValue={0.1}
+              maximumValue={18}
+              step={0.01}
+              formatValue={v => Number(v).toFixed(2)}
+              onValueChange={v => updateFilterParam('lowPassQ', v)}
+              onSlidingComplete={() => commitFilters(filters)}
+            />
+          </View>
+
+          <View
+            style={[
+              styles.section,
+              { backgroundColor: theme.card ?? theme.background },
+            ]}
+          >
+            <View style={styles.sectionHeaderRow}>
+              <Text style={[styles.sectionTitle, { color: theme.textPrimary }]}>
+                Reverb
+              </Text>
+              <Switch
+                value={reverbEnabled}
+                onValueChange={handleReverbToggle}
+              />
+            </View>
+
+            <EffectSlider
+              label="Room Size"
+              value={reverb.roomSize}
+              disabled={!reverbEnabled}
+              onValueChange={v => updateReverbParam('roomSize', v)}
+              onSlidingComplete={() => commitReverb(reverb)}
+            />
+            <EffectSlider
+              label="Damping"
+              value={reverb.damping}
+              disabled={!reverbEnabled}
+              onValueChange={v => updateReverbParam('damping', v)}
+              onSlidingComplete={() => commitReverb(reverb)}
+            />
+            <EffectSlider
+              label="Wet Level"
+              value={reverb.wetLevel}
+              disabled={!reverbEnabled}
+              onValueChange={v => updateReverbParam('wetLevel', v)}
+              onSlidingComplete={() => commitReverb(reverb)}
+            />
+            <EffectSlider
+              label="Dry Level"
+              value={reverb.dryLevel}
+              disabled={!reverbEnabled}
+              onValueChange={v => updateReverbParam('dryLevel', v)}
+              onSlidingComplete={() => commitReverb(reverb)}
+            />
+            <EffectSlider
+              label="Width"
+              value={reverb.width}
+              disabled={!reverbEnabled}
+              onValueChange={v => updateReverbParam('width', v)}
+              onSlidingComplete={() => commitReverb(reverb)}
+            />
+            <LabeledSwitch
+              label="Freeze Mode"
+              value={reverb.freezeMode >= 0.5}
+              disabled={!reverbEnabled}
+              onValueChange={v => {
+                const next = { ...reverb, freezeMode: v ? 1 : 0 };
+                setReverb(next);
+                pushReverbToNative(next);
+                commitReverb(next);
+              }}
+            />
+          </View>
         </View>
-
-        <EffectSlider
-          label="Room Size"
-          value={reverb.roomSize}
-          disabled={!reverbEnabled}
-          onValueChange={v => updateReverbParam('roomSize', v)}
-          onSlidingComplete={() => commitReverb(reverb)}
-        />
-        <EffectSlider
-          label="Damping"
-          value={reverb.damping}
-          disabled={!reverbEnabled}
-          onValueChange={v => updateReverbParam('damping', v)}
-          onSlidingComplete={() => commitReverb(reverb)}
-        />
-        <EffectSlider
-          label="Wet Level"
-          value={reverb.wetLevel}
-          disabled={!reverbEnabled}
-          onValueChange={v => updateReverbParam('wetLevel', v)}
-          onSlidingComplete={() => commitReverb(reverb)}
-        />
-        <EffectSlider
-          label="Dry Level"
-          value={reverb.dryLevel}
-          disabled={!reverbEnabled}
-          onValueChange={v => updateReverbParam('dryLevel', v)}
-          onSlidingComplete={() => commitReverb(reverb)}
-        />
-        <EffectSlider
-          label="Width"
-          value={reverb.width}
-          disabled={!reverbEnabled}
-          onValueChange={v => updateReverbParam('width', v)}
-          onSlidingComplete={() => commitReverb(reverb)}
-        />
-        <LabeledSwitch
-          label="Freeze Mode"
-          value={reverb.freezeMode >= 0.5}
-          disabled={!reverbEnabled}
-          onValueChange={v => {
-            const next = { ...reverb, freezeMode: v ? 1 : 0 };
-            setReverb(next);
-            pushReverbToNative(next);
-            commitReverb(next);
-          }}
-        />
-      </View>
+      </ScrollView>
     </SafeAreaView>
   );
 }
@@ -344,6 +529,6 @@ const styles = StyleSheet.create({
     paddingHorizontal: 16,
     paddingVertical: 12,
     borderWidth: 1,
-    borderRadius: 50
-  }
+    borderRadius: 50,
+  },
 });
